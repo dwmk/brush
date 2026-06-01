@@ -29,8 +29,9 @@ export default function StudyMatzPage() {
   const [initialLoadDone, setInitialLoadDone] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
 
-  const loadData = useCallback(async (isRefresh = false) => {
-    if (isLoading) return
+  const loadData = useCallback(async (isRefresh = false, overrideCursor: string | null = null) => {
+    // Allow recursive auto-loads to bypass this check using overrideCursor
+    if (isLoading && !overrideCursor) return
 
     setIsLoading(true)
     setError(null)
@@ -40,7 +41,8 @@ export default function StudyMatzPage() {
       setMaterials([])
     }
 
-    const cursor = isRefresh ? null : nextCursor
+    // Use overrideCursor if provided (during auto-load), otherwise fallback to state
+    const cursor = isRefresh ? null : (overrideCursor || nextCursor)
 
     try {
       const url = cursor ? `${WORKER_API_URL}?cursor=${cursor}` : WORKER_API_URL
@@ -53,14 +55,19 @@ export default function StudyMatzPage() {
       const data: ApiResponse = await response.json()
       const items = data.items || []
 
-      setMaterials(prev => isRefresh ? items : [...prev, ...items])
+      // Safely append and filter out duplicates based on the unique publicUrl
+      setMaterials(prev => {
+        const combined = isRefresh ? items : [...prev, ...items]
+        return Array.from(new Map(combined.map(item => [item.publicUrl, item])).values())
+      })
+      
       setNextCursor(data.nextCursor)
 
       // Auto-load next batch if there's more data
       if (data.nextCursor) {
         setTimeout(() => {
-          setIsLoading(false)
-          loadData(false)
+          // Pass the fresh cursor directly to avoid stale state in closures
+          loadData(false, data.nextCursor)
         }, 600)
       } else {
         setIsLoading(false)
@@ -71,6 +78,7 @@ export default function StudyMatzPage() {
       setIsLoading(false)
       setInitialLoadDone(true)
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading, nextCursor])
 
   useEffect(() => {
