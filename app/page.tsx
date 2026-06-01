@@ -342,11 +342,11 @@ export default function HomePage() {
               <div className="flex items-center gap-2">
                 <span className="bg-primary px-3 py-1 neo-border font-black">BRUSH</span>
                 <span className="text-sm text-muted-foreground font-medium">
-                 by <a href="https://dewanmukto.github.io">Dewan Mukto</a>, creator of <a href="https://braxapp.github.io">BRAX</a>
+                 by <a target="_blank" href="https://dewanmukto.github.io">Dewan Mukto</a>, creator of <a target="_blank" href="https://braxapp.github.io">BRAX</a>
                 </span>
               </div>
               <p className="text-xs text-muted-foreground font-mono">
-                 Data from <a href="https://usis-cdn.eniamza.com/connect.json">Tashfeen Azmaine's</a> CDN.
+                 Data from <a target="_blank" href="https://usis-cdn.eniamza.com/connect.json">Tashfeen Azmaine's</a> CDN.
               </p>
             </div>
           </div>
