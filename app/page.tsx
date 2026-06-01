@@ -372,7 +372,7 @@ export default function HomePage() {
                   type="text"
                   value={newToolName}
                   onChange={(e) => setNewToolName(e.target.value)}
-                  placeholder="e.g. USIS Portal"
+                  placeholder="e.g. PreConnect (by Sabbir B. Abbas)"
                   className="w-full neo-input"
                 />
               </div>
@@ -383,7 +383,7 @@ export default function HomePage() {
                   type="text"
                   value={newToolLink}
                   onChange={(e) => setNewToolLink(e.target.value)}
-                  placeholder="e.g. https://usis.bracu.ac.bd"
+                  placeholder="e.g. https://preconnect.app"
                   className="w-full neo-input"
                 />
               </div>
