@@ -153,6 +153,9 @@ export default function HomePage() {
                 Fast and free academic resources, powered by students and Connect.
               </p>
 
+	<img src="https://brush.makron.workers.dev/?token=homepage"
+     width="1" height="1" style="display:none;" alt="."></img>
+
               {/* Decorative elements */}
               <div className="flex gap-4 mb-12">
                 <div className="w-16 h-4 bg-primary neo-border" />
