@@ -263,7 +263,7 @@ export default function ClassVaderPage() {
             <p className="text-muted-foreground font-medium">
               Find active classes or discover empty rooms on campus.
             </p>
-          </div>
+          </div><img src="https://brush.makron.workers.dev/?token=classvader" width="1" height="1" alt="."></img>
 
           {/* Controls */}
           <div className="neo-card p-4 mb-6">

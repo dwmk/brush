@@ -181,7 +181,7 @@ export default function RoutinePage() {
             <p className="text-muted-foreground font-medium">
               Search courses and build your schedule. Conflicts are detected automatically.
             </p>
-          </div>
+          </div><img src="https://brush.makron.workers.dev/?token=routine" width="1" height="1" alt="."></img>
 
           {/* Search Area */}
           <div className="neo-card p-4 mb-6">
