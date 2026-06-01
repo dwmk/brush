@@ -123,7 +123,7 @@ export default function StudyMatzPage() {
                     Crowd-sourced academic notes, lectures &amp; study materials
                   </p><img src="https://brush.makron.workers.dev/?token=studymatz" width="1" height="1" alt="."></img>
                   <p className="text-xs font-mono mt-1 opacity-70">
-                    Fetched from <b><a target="_blank" href="https://boracle.app/course-materials">BORACLE</a><b/>
+                    Fetched from <b><a target="_blank" href="https://boracle.app/course-materials">BORACLE</a></b>
                   </p>
                 </div>
               </div>
