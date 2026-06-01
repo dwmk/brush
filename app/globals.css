@@ -1,0 +1,252 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+/* BRUSH Neobrutalist Design System */
+:root {
+  /* Core Colors - High Energy Neobrutalism */
+  --background: #FFFEF0;
+  --foreground: #000000;
+  --card: #FFFFFF;
+  --card-foreground: #000000;
+  --popover: #FFFFFF;
+  --popover-foreground: #000000;
+  
+  /* Primary - Electric Yellow */
+  --primary: #FAFF00;
+  --primary-foreground: #000000;
+  
+  /* Secondary - Hot Pink */
+  --secondary: #FF3D8F;
+  --secondary-foreground: #000000;
+  
+  /* Accent Colors */
+  --accent: #00E5FF;
+  --accent-foreground: #000000;
+  
+  /* Tertiary - Lime Green */
+  --tertiary: #C8FF00;
+  --tertiary-foreground: #000000;
+  
+  /* Muted tones */
+  --muted: #F5F5F5;
+  --muted-foreground: #4A4A4A;
+  
+  /* Destructive - Bold Red */
+  --destructive: #FF4444;
+  --destructive-foreground: #000000;
+  
+  /* Borders - Always Black */
+  --border: #000000;
+  --input: #FFFFFF;
+  --ring: #000000;
+  
+  /* Chart colors */
+  --chart-1: #FAFF00;
+  --chart-2: #FF3D8F;
+  --chart-3: #00E5FF;
+  --chart-4: #C8FF00;
+  --chart-5: #FF9500;
+  
+  /* Neobrutalist specific */
+  --radius: 0px;
+  --border-width: 3px;
+  --shadow-offset: 6px;
+  
+  /* Tool-specific colors */
+  --routine-color: #FAFF00;
+  --classvader-color: #FF3D8F;
+  --cgpa-color: #00E5FF;
+  
+  /* Sidebar (keeping for compatibility) */
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #000000;
+  --sidebar-primary: #FAFF00;
+  --sidebar-primary-foreground: #000000;
+  --sidebar-accent: #FF3D8F;
+  --sidebar-accent-foreground: #000000;
+  --sidebar-border: #000000;
+  --sidebar-ring: #000000;
+}
+
+@theme inline {
+  --font-sans: 'Space Grotesk', 'Geist', ui-sans-serif, system-ui;
+  --font-mono: 'JetBrains Mono', 'Geist Mono', ui-monospace, monospace;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Neobrutalist Utility Classes */
+.neo-border {
+  border: 3px solid #000000;
+}
+
+.neo-shadow {
+  box-shadow: 6px 6px 0px #000000;
+}
+
+.neo-shadow-sm {
+  box-shadow: 4px 4px 0px #000000;
+}
+
+.neo-shadow-lg {
+  box-shadow: 8px 8px 0px #000000;
+}
+
+.neo-hover {
+  transition: transform 0.1s ease-in-out, box-shadow 0.1s ease-in-out;
+}
+
+.neo-hover:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 8px 8px 0px #000000;
+}
+
+.neo-hover:active {
+  transform: translate(2px, 2px);
+  box-shadow: 4px 4px 0px #000000;
+}
+
+.neo-card {
+  background-color: var(--card);
+  border: 3px solid #000000;
+  box-shadow: 6px 6px 0px #000000;
+}
+
+.neo-btn {
+  border: 3px solid #000000;
+  box-shadow: 4px 4px 0px #000000;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  transition: transform 0.1s ease-in-out, box-shadow 0.1s ease-in-out;
+}
+
+.neo-btn:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px #000000;
+}
+
+.neo-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px #000000;
+}
+
+.neo-input {
+  border: 3px solid #000000;
+  background-color: white;
+  padding: 0.75rem 1rem;
+  font-family: var(--font-mono);
+}
+
+.neo-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #000000, 0 0 0 4px white;
+}
+
+/* Brutalist text styles */
+.text-brutal {
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.025em;
+}
+
+.text-brutal-xl {
+  font-size: clamp(3rem, 10vw, 6rem);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.05em;
+  line-height: 0.9;
+}
+
+/* Pattern backgrounds */
+.pattern-dots {
+  background-image: radial-gradient(#000000 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+.pattern-grid {
+  background-image: 
+    linear-gradient(to right, #000000 1px, transparent 1px),
+    linear-gradient(to bottom, #000000 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.pattern-diagonal {
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 10px,
+    #000000 10px,
+    #000000 11px
+  );
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--muted);
+  border: 2px solid #000000;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #000000;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #333333;
+}
+
+/* Selection styling */
+::selection {
+  background: var(--primary);
+  color: #000000;
+}
