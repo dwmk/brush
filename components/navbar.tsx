@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState, useEffect } from 'react'
+import { CustomTool, loadCustomTools } from '@/lib/custom-tools'
 
 const navItems = [
   { href: '/', label: 'Hub' },
@@ -14,6 +15,21 @@ const navItems = [
 export function Navbar() {
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [customTools, setCustomTools] = useState<CustomTool[]>([])
+
+  // Load custom tools on mount
+  useEffect(() => {
+    setCustomTools(loadCustomTools())
+  }, [])
+
+  // Listen for custom tools updates
+  useEffect(() => {
+    const handleUpdate = () => {
+      setCustomTools(loadCustomTools())
+    }
+    window.addEventListener('customToolsUpdated', handleUpdate)
+    return () => window.removeEventListener('customToolsUpdated', handleUpdate)
+  }, [])
 
   // Close menu on route change
   useEffect(() => {
@@ -58,6 +74,19 @@ export function Navbar() {
                   {item.label}
                 </Link>
               ))}
+              
+              {/* Custom tools in navbar */}
+              {customTools.map((tool) => (
+                <a
+                  key={tool.id}
+                  href={tool.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-4 py-2 font-bold uppercase tracking-wide text-sm neo-hover neo-border bg-gray-200 hover:bg-gray-300"
+                >
+                  {tool.name}
+                </a>
+              ))}
             </div>
 
             {/* Mobile menu button */}
@@ -86,7 +115,7 @@ export function Navbar() {
         
         {/* Sliding Panel */}
         <div
-          className={`absolute top-16 right-0 w-64 h-[calc(100vh-64px)] bg-white neo-border border-t-0 border-r-0 transform transition-transform duration-200 ${
+          className={`absolute top-16 right-0 w-64 h-[calc(100vh-64px)] bg-white neo-border border-t-0 border-r-0 transform transition-transform duration-200 overflow-y-auto ${
             mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
           }`}
         >
@@ -106,6 +135,29 @@ export function Navbar() {
                 {item.label}
               </Link>
             ))}
+            
+            {/* Custom tools in mobile menu */}
+            {customTools.length > 0 && (
+              <>
+                <div className="pt-4 pb-2">
+                  <span className="text-xs font-bold uppercase text-muted-foreground">
+                    Your Shortcuts
+                  </span>
+                </div>
+                {customTools.map((tool) => (
+                  <a
+                    key={tool.id}
+                    href={tool.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block w-full px-4 py-3 font-bold uppercase tracking-wide text-sm neo-border bg-gray-200 hover:bg-gray-300"
+                  >
+                    {tool.name}
+                  </a>
+                ))}
+              </>
+            )}
           </div>
           
           <div className="absolute bottom-4 left-4 right-4">
