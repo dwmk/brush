@@ -155,7 +155,7 @@ export default function HomePage() {
               <div className="flex items-center gap-2">
                 <span className="bg-primary px-3 py-1 neo-border font-black">BRUSH</span>
                 <span className="text-sm text-muted-foreground font-medium">
-                  by DMI, creator of BRAX
+                  by DMI, creator of <a href="https://braxapp.github.io">BRAX</a>
                 </span>
               </div>
               <p className="text-xs text-muted-foreground font-mono">
