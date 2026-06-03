@@ -32,7 +32,7 @@ export default function StudyMatzPage() {
   const [submitStatus, setSubmitStatus] = useState<{ type: 'success' | 'error', msg: string } | null>(null)
   const formRef = useRef<HTMLFormElement>(null)
 
-  const loadData = useCallback(async () => {
+ const loadData = useCallback(async () => {
     setIsLoading(true)
     setError(null)
 
@@ -45,9 +45,21 @@ export default function StudyMatzPage() {
 
       const data = await response.json()
       
-      const items: StudyMaterial[] = data.items || (Array.isArray(data) ? data : [])
+      const rawItems = data.items || (Array.isArray(data) ? data : [])
 
-      setMaterials(Array.from(new Map(items.map(item => [item.publicUrl, item])).values()))
+      // 1. Map the JSON properties to match the StudyMaterial interface
+      const mappedItems: StudyMaterial[] = rawItems.map((item: any) => ({
+        courseCode: item.Course || '',
+        fileExtension: item.Type || '',
+        semester: item.Semester || '',
+        posterName: item.Uploader || '',
+        postDescription: item.Description || '',
+        publicUrl: item.Link || '',
+        createdAt: item.createdAt || 0 // Default to 0 since JSON lacks timestamps
+      }))
+
+      // 2. Removed the Map() deduplication because empty links were collapsing the list
+      setMaterials(mappedItems)
       setIsLoading(false)
       setInitialLoadDone(true)
     } catch (err) {
@@ -117,6 +129,7 @@ export default function StudyMatzPage() {
   })
 
   const formatDate = (timestamp: number) => {
+    if (!timestamp) return 'N/A'
     return new Date(timestamp * 1000).toLocaleDateString()
   }
 
@@ -323,16 +336,22 @@ export default function StudyMatzPage() {
                           <td className="p-3 font-medium text-sm">{escapeHtml(item.semester)}</td>
                           <td className="p-3 font-medium text-sm">{escapeHtml(item.posterName)}</td>
                           <td className="p-3 text-sm max-w-xs">
-                            <a 
-                              href={item.publicUrl} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="hover:underline flex items-center gap-1 text-foreground"
-                              title={item.postDescription}
-                            >
-                              <span className="truncate">{escapeHtml(item.postDescription)}</span>
-                              <ExternalLink className="w-3 h-3 flex-shrink-0 opacity-50" />
-                            </a>
+                            {item.publicUrl ? (
+                              <a 
+                                href={item.publicUrl} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="hover:underline flex items-center gap-1 text-foreground"
+                                title={item.postDescription}
+                              >
+                                <span className="truncate block">{escapeHtml(item.postDescription)}</span>
+                                <ExternalLink className="w-3 h-3 flex-shrink-0 opacity-50" />
+                              </a>
+                            ) : (
+                              <span className="truncate block" title={item.postDescription}>
+                                {escapeHtml(item.postDescription)}
+                              </span>
+                            )}
                           </td>
                           <td className="p-3 text-xs text-muted-foreground font-mono">
                             {formatDate(item.createdAt)}
