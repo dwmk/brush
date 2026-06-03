@@ -2,254 +2,274 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { Navbar } from '@/components/navbar'
-import { BookOpen, RefreshCw, ExternalLink, FileText, AlertCircle } from 'lucide-react'
+import { BookOpen, RefreshCw, ExternalLink, FileText, AlertCircle, Send, CheckCircle } from 'lucide-react'
 
 interface StudyMaterial {
-  courseCode: string
-  fileExtension: string
-  semester: string
-  posterName: string
-  postDescription: string
-  publicUrl: string
-  createdAt: number
+  Course: string
+  Type: string
+  Semester: string
+  Uploader: string
+  Description: string
 }
-
-interface ApiResponse {
-  items: StudyMaterial[]
-  nextCursor: string | null
-}
-
-const WORKER_API_URL = 'https://data01.makron.workers.dev'
 
 export default function StudyMatzPage() {
   const [materials, setMaterials] = useState<StudyMaterial[]>([])
+  const [filteredMaterials, setFilteredMaterials] = useState<StudyMaterial[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [nextCursor, setNextCursor] = useState<string | null>(null)
-  const [initialLoadDone, setInitialLoadDone] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
 
-  const loadData = useCallback(async (isRefresh = false, overrideCursor: string | null = null) => {
-    // Allow recursive auto-loads to bypass this check using overrideCursor
-    if (isLoading && !overrideCursor) return
+  // Form Submission States
+  const [formData, setFormData] = useState({
+    course: '',
+    type: 'PDF',
+    uploader: '',
+    semester: '',
+    description: ''
+  })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitSuccess, setSubmitSuccess] = useState<string | null>(null)
+  const [submitError, setSubmitError] = useState<string | null>(null)
 
+  // Fetch complete JSON archive
+  const loadData = useCallback(async () => {
     setIsLoading(true)
     setError(null)
-
-    if (isRefresh) {
-      setNextCursor(null)
-      setMaterials([])
-    }
-
-    // Use overrideCursor if provided (during auto-load), otherwise fallback to state
-    const cursor = isRefresh ? null : (overrideCursor || nextCursor)
-
     try {
-      const url = cursor ? `${WORKER_API_URL}?cursor=${cursor}` : WORKER_API_URL
-      const response = await fetch(url)
-      
+      const response = await fetch('/studymatz.json')
       if (!response.ok) {
-        throw new Error(`API error: ${response.status}`)
+        throw new Error(`Failed to fetch data: ${response.status} ${response.statusText}`)
       }
-
-      const data: ApiResponse = await response.json()
-      const items = data.items || []
-
-      // Safely append and filter out duplicates based on the unique publicUrl
-      setMaterials(prev => {
-        const combined = isRefresh ? items : [...prev, ...items]
-        return Array.from(new Map(combined.map(item => [item.publicUrl, item])).values())
-      })
-      
-      setNextCursor(data.nextCursor)
-
-      // Auto-load next batch if there's more data
-      if (data.nextCursor) {
-        setTimeout(() => {
-          // Pass the fresh cursor directly to avoid stale state in closures
-          loadData(false, data.nextCursor)
-        }, 600)
-      } else {
-        setIsLoading(false)
-        setInitialLoadDone(true)
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch data')
+      const data: StudyMaterial[] = await response.json()
+      setMaterials(data)
+      setFilteredMaterials(data)
+    } catch (err: any) {
+      console.error('Error loading static JSON data:', err)
+      setError(err.message || 'Failed to load study materials archive.')
+    } finally {
       setIsLoading(false)
-      setInitialLoadDone(true)
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoading, nextCursor])
-
-  useEffect(() => {
-    loadData(true)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const handleRefresh = () => {
-    setInitialLoadDone(false)
-    loadData(true)
-  }
+  useEffect(() => {
+    loadData()
+  }, [loadData])
 
-  const filteredMaterials = materials.filter(item => {
-    if (!searchQuery) return true
+  // Handle local Client-side search filtering
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setFilteredMaterials(materials)
+      return
+    }
     const query = searchQuery.toLowerCase()
-    return (
-      item.courseCode?.toLowerCase().includes(query) ||
-      item.semester?.toLowerCase().includes(query) ||
-      item.posterName?.toLowerCase().includes(query) ||
-      item.postDescription?.toLowerCase().includes(query) ||
-      item.fileExtension?.toLowerCase().includes(query)
+    const filtered = materials.filter(
+      (item) =>
+        item.Course.toLowerCase().includes(query) ||
+        item.Description.toLowerCase().includes(query) ||
+        item.Uploader.toLowerCase().includes(query) ||
+        item.Semester.toLowerCase().includes(query)
     )
-  })
+    setFilteredMaterials(filtered)
+  }, [searchQuery, materials])
 
-  const formatDate = (timestamp: number) => {
-    return new Date(timestamp * 1000).toLocaleDateString()
+  // Form input handler
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }))
   }
 
-  const escapeHtml = (val: string | null | undefined) => {
-    if (val === null || val === undefined) return 'N/A'
-    return String(val)
+  // Handle Submission to Cloudflare Webhook Worker
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsSubmitting(true)
+    setSubmitSuccess(null)
+    setSubmitError(null)
+
+    try {
+      const response = await fetch('https://brush-studymatz.makron.workers.dev', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to submit material for review.')
+      }
+
+      setSubmitSuccess('Thank you! Your resource has been submitted for verification.')
+      setFormData({ course: '', type: 'PDF', uploader: '', semester: '', description: '' })
+    } catch (err: any) {
+      setSubmitError(err.message || 'Something went wrong. Please try again.')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const escapeHtml = (str: string) => {
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;')
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
       
-      <main className="pt-20 pb-8 px-4">
-        <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <div className="neo-card p-6 mb-6 bg-orange-400">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="p-3 bg-white neo-border">
-                  <BookOpen className="w-8 h-8" />
-                </div>
-                <div>
-                  <h1 className="text-2xl md:text-3xl font-black uppercase">Study Matz</h1>
-                  <p className="text-sm font-medium opacity-80">
-                    Crowd-sourced academic notes, lectures &amp; study materials
-                  </p><img src="https://brush.makron.workers.dev/?token=studymatz" width="1" height="1" alt="."></img>
-                  <p className="text-xs font-mono mt-1 opacity-70">
-                    Fetched from <b><a target="_blank" href="https://boracle.app/course-materials">BORACLE</a></b>
-                  </p>
-                </div>
+      <main className="flex-1 container max-w-6xl mx-auto px-4 py-8">
+        <div className="flex flex-col gap-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <BookOpen className="w-6 h-6 text-primary" />
+              <h1 className="text-2xl font-bold tracking-tight">StudyMatz Index</h1>
+            </div>
+            <button 
+              onClick={loadData}
+              disabled={isLoading}
+              className="flex items-center gap-2 text-sm font-medium px-3 py-1.5 rounded-md border bg-card hover:bg-accent transition-colors disabled:opacity-50"
+            >
+              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+              Refresh Archive
+            </button>
+          </div>
+
+          {/* New Submission Panel */}
+          <div className="border bg-card text-card-foreground rounded-xl shadow-sm p-6">
+            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <FileText className="w-5 h-5 text-primary" />
+              Contribute New Resource
+            </h2>
+            <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Course Code</label>
+                <input 
+                  type="text" name="course" required placeholder="e.g. CSE220"
+                  value={formData.course} onChange={handleInputChange}
+                  className="w-full px-3 py-2 border rounded-md bg-background"
+                />
               </div>
-              <button
-                onClick={handleRefresh}
-                disabled={isLoading && !initialLoadDone}
-                className="neo-btn px-4 py-2 bg-white flex items-center gap-2 disabled:opacity-50"
-              >
-                <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-                Refresh
-              </button>
+              <div>
+                <label className="block text-sm font-medium mb-1">Resource Type</label>
+                <select 
+                  name="type" value={formData.type} onChange={handleInputChange}
+                  className="w-full px-3 py-2 border rounded-md bg-background"
+                >
+                  <option value="PDF">PDF</option>
+                  <option value="GITHUB">GITHUB</option>
+                  <option value="G DRIVE">G DRIVE</option>
+                  <option value="YOUTUBE">YOUTUBE</option>
+                  <option value="WEBSITE">WEBSITE</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Your Nickname (Uploader)</label>
+                <input 
+                  type="text" name="uploader" required placeholder="e.g. Anonymous"
+                  value={formData.uploader} onChange={handleInputChange}
+                  className="w-full px-3 py-2 border rounded-md bg-background"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Semester</label>
+                <input 
+                  type="text" name="semester" required placeholder="e.g. Spring 2026"
+                  value={formData.semester} onChange={handleInputChange}
+                  className="w-full px-3 py-2 border rounded-md bg-background"
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium mb-1">Resource URL or Description</label>
+                <textarea 
+                  name="description" required rows={2} 
+                  placeholder="Provide valid links/URLs or access context here..."
+                  value={formData.description} onChange={handleInputChange}
+                  className="w-full px-3 py-2 border rounded-md bg-background resize-none"
+                />
+              </div>
+              <div className="md:col-span-2 flex justify-end mt-2">
+                <button 
+                  type="submit" disabled={isSubmitting}
+                  className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-md hover:opacity-90 transition-opacity disabled:opacity-50 font-medium"
+                >
+                  <Send className="w-4 h-4" />
+                  {isSubmitting ? 'Submitting...' : 'Submit Material'}
+                </button>
+              </div>
+            </form>
+
+            {submitSuccess && (
+              <div className="mt-4 flex items-center gap-2 text-sm text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950/30 p-3 rounded-md">
+                <CheckCircle className="w-4 h-4 flex-shrink-0" />
+                <span>{submitSuccess}</span>
+              </div>
+            )}
+            {submitError && (
+              <div className="mt-4 flex items-center gap-2 text-sm text-destructive bg-destructive/10 p-3 rounded-md">
+                <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                <span>{submitError}</span>
+              </div>
+            )}
+
+            {/* Running Notice Statement */}
+            <div className="mt-4 pt-3 border-t text-xs text-muted-foreground bg-muted/40 p-2 rounded text-center font-medium italic animate-pulse">
+              ⚠️ Notice: To ensure high quality submissions while not needing any sign-ins, your info would be submitted for review. If approved, it would be automatically added here within 24 hours.
             </div>
           </div>
 
-          {/* Search */}
-          <div className="neo-card p-4 mb-6 bg-card">
-            <input
-              type="text"
-              placeholder="Search by course, semester, uploader, description..."
+          {/* Search bar row */}
+          <div className="flex gap-4 items-center">
+            <input 
+              type="text" 
+              placeholder="Search by Course code, Semester, Description, or Uploader..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="neo-input w-full"
+              className="flex-1 px-4 py-2 border bg-card rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-sm"
             />
           </div>
 
-          {/* Error */}
           {error && (
-            <div className="neo-card p-4 mb-6 bg-red-100 flex items-center gap-3">
-              <AlertCircle className="w-5 h-5 text-red-600" />
-              <span className="text-red-800 font-medium">{error}</span>
+            <div className="p-4 bg-destructive/10 text-destructive rounded-xl flex items-center gap-3">
+              <AlertCircle className="w-5 h-5 flex-shrink-0" />
+              <p className="text-sm font-medium">{error}</p>
             </div>
           )}
 
-          {/* Loading State */}
-          {isLoading && !initialLoadDone && (
-            <div className="neo-card p-8 text-center bg-card">
-              <div className="animate-pulse">
-                <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p className="font-bold">
-                  {nextCursor ? 'Loading more materials...' : 'Fetching study materials...'}
-                </p>
-                <p className="text-sm text-muted-foreground mt-2">
-                  {materials.length} items loaded
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* Results Count */}
-          {initialLoadDone && (
-            <div className="neo-card p-3 mb-4 bg-muted">
-              <span className="text-sm font-bold">
-                Showing {filteredMaterials.length} of {materials.length} materials
-              </span>
-            </div>
-          )}
-
-          {/* Results Table */}
-          {(initialLoadDone || materials.length > 0) && (
-            <div className="neo-card p-0 overflow-hidden">
+          {/* Archive Table Rendering */}
+          {!error && (
+            <div className="border bg-card rounded-xl shadow-sm overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="w-full">
+                <table className="w-full border-collapse text-left">
                   <thead>
-                    <tr className="bg-muted">
-                      <th className="p-3 text-left font-black uppercase text-sm">Course</th>
-                      <th className="p-3 text-left font-black uppercase text-sm">Type</th>
-                      <th className="p-3 text-left font-black uppercase text-sm">Semester</th>
-                      <th className="p-3 text-left font-black uppercase text-sm">Uploader</th>
-                      <th className="p-3 text-left font-black uppercase text-sm">Description</th>
-                      <th className="p-3 text-left font-black uppercase text-sm">Date</th>
+                    <tr className="border-b bg-muted/50 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                      <th className="p-3">Course</th>
+                      <th className="p-3">Type</th>
+                      <th className="p-3">Uploader</th>
+                      <th className="p-3">Semester</th>
+                      <th className="p-3">Description</th>
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody className="divide-y">
                     {filteredMaterials.length === 0 ? (
                       <tr>
-                        <td colSpan={6} className="p-8 text-center text-muted-foreground">
-                          {searchQuery ? 'No materials match your search.' : 'No materials found.'}
+                        <td colSpan={5} className="p-8 text-center text-sm text-muted-foreground">
+                          {isLoading ? 'Loading file archive...' : 'No data records found matching search filters.'}
                         </td>
                       </tr>
                     ) : (
                       filteredMaterials.map((item, idx) => (
-                        <tr key={idx} className="neo-border border-t-0 border-l-0 border-r-0 hover:bg-muted/50">
-                          <td className="p-3 font-bold text-orange-600">{escapeHtml(item.courseCode)}</td>
-                          <td className="p-3">
-                            <span className="px-2 py-1 text-xs font-bold uppercase bg-muted neo-border">
-                              {escapeHtml(item.fileExtension)}
-                            </span>
-                          </td>
-                          <td className="p-3 font-medium text-sm">{escapeHtml(item.semester)}</td>
-                          <td className="p-3 font-medium text-sm">{escapeHtml(item.posterName)}</td>
-                          <td className="p-3 text-sm max-w-xs">
-                            <a 
-                              href={item.publicUrl} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="hover:underline flex items-center gap-1 text-foreground"
-                              title={item.postDescription}
-                            >
-                              <span className="truncate">{escapeHtml(item.postDescription)}</span>
-                              <ExternalLink className="w-3 h-3 flex-shrink-0 opacity-50" />
-                            </a>
-                          </td>
-                          <td className="p-3 text-xs text-muted-foreground font-mono">
-                            {formatDate(item.createdAt)}
-                          </td>
+                        <tr key={idx} className="hover:bg-muted/30 transition-colors">
+                          <td className="p-3 font-mono text-sm font-bold text-primary">{escapeHtml(item.Course)}</td>
+                          <td className="p-3 text-xs"><span className="px-2 py-0.5 rounded-full bg-secondary font-semibold">{escapeHtml(item.Type)}</span></td>
+                          <td className="p-3 font-medium text-sm">{escapeHtml(item.Uploader)}</td>
+                          <td className="p-3 text-sm text-muted-foreground">{escapeHtml(item.Semester)}</td>
+                          <td className="p-3 text-sm max-w-md break-words">{escapeHtml(item.Description)}</td>
                         </tr>
                       ))
                     )}
                   </tbody>
                 </table>
               </div>
-
-              {/* Loading indicator for pagination */}
-              {isLoading && initialLoadDone && (
-                <div className="p-3 bg-muted text-center">
-                  <span className="text-sm font-medium animate-pulse">Loading more...</span>
-                </div>
-              )}
             </div>
           )}
         </div>
