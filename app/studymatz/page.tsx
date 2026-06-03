@@ -328,30 +328,31 @@ export default function StudyMatzPage() {
                       filteredMaterials.map((item, idx) => (
                         <tr key={idx} className="neo-border border-t-0 border-l-0 border-r-0 hover:bg-muted/50">
                           <td className="p-3 font-bold text-orange-600">{escapeHtml(item.courseCode)}</td>
-                          <td className="p-3">
-                            <span className="px-2 py-1 text-xs font-bold uppercase bg-muted neo-border">
-                              {escapeHtml(item.fileExtension)}
-                            </span>
-                          </td>
-                          <td className="p-3 font-medium text-sm">{escapeHtml(item.semester)}</td>
-                          <td className="p-3 font-medium text-sm">{escapeHtml(item.posterName)}</td>
-                          <td className="p-3 text-sm max-w-xs">
+                         <td className="p-3">
                             {item.publicUrl ? (
                               <a 
                                 href={item.publicUrl} 
                                 target="_blank" 
                                 rel="noopener noreferrer"
-                                className="hover:underline flex items-center gap-1 text-foreground"
-                                title={item.postDescription}
+                                className="inline-flex items-center gap-1 hover:opacity-80 transition-opacity"
                               >
-                                <span className="truncate block">{escapeHtml(item.postDescription)}</span>
-                                <ExternalLink className="w-3 h-3 flex-shrink-0 opacity-50" />
+                                <span className="px-2 py-1 text-xs font-bold uppercase bg-muted neo-border flex items-center gap-1">
+                                  {escapeHtml(item.fileExtension)}
+                                  <ExternalLink className="w-3 h-3 text-muted-foreground" />
+                                </span>
                               </a>
                             ) : (
-                              <span className="truncate block" title={item.postDescription}>
-                                {escapeHtml(item.postDescription)}
+                              <span className="px-2 py-1 text-xs font-bold uppercase bg-muted neo-border opacity-60">
+                                {escapeHtml(item.fileExtension)}
                               </span>
                             )}
+                          </td>
+                          <td className="p-3 font-medium text-sm">{escapeHtml(item.semester)}</td>
+                          <td className="p-3 font-medium text-sm">{escapeHtml(item.posterName)}</td>
+                          <td className="p-3 text-sm max-w-xs">
+                            <span className="truncate block" title={item.postDescription}>
+                              {escapeHtml(item.postDescription)}
+                            </span>
                           </td>
                           <td className="p-3 text-xs text-muted-foreground font-mono">
                             {formatDate(item.createdAt)}
