@@ -18,9 +18,6 @@ interface ApiResponse {
   items?: StudyMaterial[]
 }
 
-const JSON_URL = '/studymatz.json'
-// Replace this with your newly deployed worker URL
-const SUBMISSION_WORKER_URL = 'https://submit-studymatz.YOUR-ACCOUNT.workers.dev' 
 
 export default function StudyMatzPage() {
   const [materials, setMaterials] = useState<StudyMaterial[]>([])
@@ -40,8 +37,7 @@ export default function StudyMatzPage() {
     setError(null)
 
     try {
-      // Added a cache-busting timestamp for local JSON refresh
-      const response = await fetch(`${JSON_URL}?t=${Date.now()}`)
+      const response = await fetch(`${'/studymatz.json'}?t=${Date.now()}`)
       
       if (!response.ok) {
         throw new Error(`Failed to load data: ${response.status}`)
@@ -49,7 +45,6 @@ export default function StudyMatzPage() {
 
       const data = await response.json()
       
-      // Handle both { items: [...] } and direct array [...] formats
       const items: StudyMaterial[] = data.items || (Array.isArray(data) ? data : [])
 
       setMaterials(Array.from(new Map(items.map(item => [item.publicUrl, item])).values()))
@@ -81,7 +76,16 @@ export default function StudyMatzPage() {
     try {
       const formData = new FormData(formRef.current)
       
-      const response = await fetch(SUBMISSION_WORKER_URL, {
+      // Custom validation for File OR URL
+      const resourceUrl = formData.get('resourceUrl') as string
+      const files = formData.getAll('files') as File[]
+      const hasValidFiles = files.some(file => file.size > 0)
+      
+      if (!resourceUrl.trim() && !hasValidFiles) {
+        throw new Error("Please provide either a Resource URL or attach at least one file.")
+      }
+      
+      const response = await fetch('https://brush-studymatz.makron.workers.dev', {
         method: 'POST',
         body: formData,
       })
@@ -195,9 +199,25 @@ export default function StudyMatzPage() {
                       <label className="block text-sm font-bold mb-1">Your Name (Optional)</label>
                       <input type="text" name="uploaderName" placeholder="Anonymous" className="neo-input w-full" />
                     </div>
-                    <div>
-                      <label className="block text-sm font-bold mb-1">Attach Files</label>
-                      <input type="file" name="files" multiple required className="neo-input w-full bg-white file:mr-4 file:py-1 file:px-4 file:border-0 file:text-sm file:font-bold file:bg-green-100 file:text-green-700 hover:file:bg-green-200" />
+                  </div>
+
+                  {/* Either / Or Section */}
+                  <div className="p-4 bg-muted neo-border space-y-4">
+                    <h3 className="font-black text-sm uppercase">Resource Content (Provide at least one)</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-bold mb-1">Resource Link (URL)</label>
+                        <input type="url" name="resourceUrl" placeholder="https://drive.google.com/..." className="neo-input w-full" />
+                      </div>
+                      <div className="flex flex-col justify-center">
+                        <div className="text-center font-bold text-muted-foreground my-2 md:my-0 md:mt-6 hidden md:block">
+                          - OR -
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-bold mb-1">Attach Files</label>
+                        <input type="file" name="files" multiple className="neo-input w-full bg-white file:mr-4 file:py-1 file:px-4 file:border-0 file:text-sm file:font-bold file:bg-green-100 file:text-green-700 hover:file:bg-green-200" />
+                      </div>
                     </div>
                   </div>
                   
