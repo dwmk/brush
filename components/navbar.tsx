@@ -163,7 +163,7 @@ export function Navbar() {
           <div className="absolute bottom-4 left-4 right-4">
             <div className="neo-border p-3 bg-muted text-center">
               <span className="text-xs font-mono text-muted-foreground">
-                by Dewan Mukto
+                by <a target="_blank" href="https://dewanmukto.github.io/">Dewan Mukto</a>
               </span>
             </div>
           </div>
