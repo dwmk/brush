@@ -10,6 +10,7 @@ const navItems = [
   { href: '/routine', label: 'Routine' },
   { href: '/classvader', label: 'Class Vader' },
   { href: '/cgpa', label: 'CGPA' },
+  { href: '/studymatz', label: 'Study Matz' },
 ]
 
 export function Navbar() {
