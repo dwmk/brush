@@ -76,28 +76,28 @@ const moreTools = [
   {
     id: 'acado',
     name: 'Acado',
-    description: 'Academic document editor, with built-in APA 7 citation system and pre-formatted PDF generator.',
+    description: 'Academic document editor, with built-in APA 7 citation system and pre-formatted PDF generator. <font color="#ff0000">Early access</font>.',
     href: 'https://acado.makron.app',
     color: 'bg-[#E0B0FF]', // Soft Purple / Mauve
   },
   {
     id: 'mizucv',
     name: 'MizuCV',
-    description: 'Automatic CV builder, with built-in Europass CV format and PDF generator. Easily select which info you want to show.',
+    description: 'Automatic CV builder, with built-in Europass CV format and PDF generator. Easily select which info you want to show. <font color="#ff0000">Early access</font>.',
     href: 'https://cv.makron.app',
     color: 'bg-[#C3B1E1]', // Pastel Purple
   },
   {
     id: 'teck',
     name: 'Teck',
-    description: 'Online LaTeX editor and PDF generator, with Overleaf template compatibility for imports/exports. Early access.',
+    description: 'Online LaTeX editor and PDF generator, with Overleaf template compatibility for imports/exports. <font color="#ff0000">Early access</font>.',
     href: 'https://teck.makron.app',
     color: 'bg-[#BDB5D5]', // Thistle Purple
   },
   {
     id: 'aichecker',
     name: 'AI Checker and Humanizer',
-    description: 'Check your pasted text for AI generated content. Early access.',
+    description: 'Check your pasted text for AI generated content. <font color="#ff0000">Early access</font>.',
     href: 'https://makron.app/ai-detector-humanizer/',
     color: 'bg-[#D6CADD]', // Pale Purple
   },
