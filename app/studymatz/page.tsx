@@ -158,7 +158,7 @@ export default function StudyMatzPage() {
                   </p>
                   <img src="https://brush.makron.workers.dev/?token=studymatz" width="1" height="1" alt="." />
                   <p className="text-xs font-mono mt-1 opacity-70">
-                    Some resources have been collected from <b><a target="_blank" href="https://boracle.app/course-materials" rel="noreferrer">BORACLE</a></b>
+                    Primarily resources have been collected from <b><a target="_blank" href="https://boracle.app/course-materials" rel="noreferrer">BORACLE</a></b>
                   </p>
                 </div>
               </div>

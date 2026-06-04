@@ -82,7 +82,7 @@ const moreTools = [
   },
   {
     id: 'mizucv',
-    name: 'MizuCV',
+    name: 'Mizu',
     description: 'Automatic CV builder, with built-in Europass CV format and PDF generator. Easily select which info you want to show. 𝗘𝗮𝗿𝗹𝘆 𝗔𝗰𝗰𝗲𝘀𝘀.',
     href: 'https://cv.makron.app',
     color: 'bg-[#C3B1E1]', // Pastel Purple
