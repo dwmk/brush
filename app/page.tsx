@@ -72,6 +72,37 @@ const tools = [
   },
 ]
 
+const moreTools = [
+  {
+    id: 'acado',
+    name: 'Acado',
+    description: 'Academic document editor, with built-in APA 7 citation system and pre-formatted PDF generator.',
+    href: 'https://acado.makron.app',
+    color: 'bg-[#E0B0FF]', // Soft Purple / Mauve
+  },
+  {
+    id: 'mizucv',
+    name: 'MizuCV',
+    description: 'Automatic CV builder, with built-in Europass CV format and PDF generator. Easily select which info you want to show.',
+    href: 'https://cv.makron.app',
+    color: 'bg-[#C3B1E1]', // Pastel Purple
+  },
+  {
+    id: 'teck',
+    name: 'Teck',
+    description: 'Online LaTeX editor and PDF generator, with Overleaf template compatibility for imports/exports. Early access.',
+    href: 'https://teck.makron.app',
+    color: 'bg-[#BDB5D5]', // Thistle Purple
+  },
+  {
+    id: 'aichecker',
+    name: 'AI Checker and Humanizer',
+    description: 'Check your pasted text for AI generated content. Early access.',
+    href: 'https://makron.app/ai-detector-humanizer/',
+    color: 'bg-[#D6CADD]', // Pale Purple
+  },
+]
+
 export default function HomePage() {
   const [customTools, setCustomTools] = useState<CustomTool[]>([])
   const [toolsLoaded, setToolsLoaded] = useState(false)
@@ -348,6 +379,69 @@ export default function HomePage() {
                 </span>
               </div>
             </button>
+          </div>
+        </section>
+
+
+	{/* More Tools Section */}
+        <section className="max-w-7xl mx-auto px-4 py-8">
+          <div className="flex items-center gap-4 mb-8">
+            <div className="h-1 flex-1 bg-black" />
+            <h2 className="text-xl md:text-2xl font-black uppercase tracking-tight text-center whitespace-nowrap">
+              Some more tools by me
+            </h2>
+            <div className="h-1 flex-1 bg-black" />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {moreTools.map((tool) => (
+              <a
+                key={tool.id}
+                href={tool.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group neo-card neo-hover p-0 overflow-hidden flex flex-col justify-between"
+              >
+                <div>
+                  {/* Card header with Purple theme and Link Icon */}
+                  <div className={`${tool.color} p-6 neo-border border-t-0 border-l-0 border-r-0`}>
+                    <div className="flex items-center justify-between">
+                      <svg viewBox="0 0 24 24" className="w-12 h-12" fill="none" stroke="currentColor" strokeWidth="3">
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                      </svg>
+                      <svg 
+                        viewBox="0 0 24 24" 
+                        className="w-8 h-8 transform group-hover:translate-x-2 transition-transform" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        strokeWidth="3"
+                      >
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                        <polyline points="12 5 19 12 12 19" />
+                      </svg>
+                    </div>
+                  </div>
+                  
+                  {/* Card body */}
+                  <div className="p-6">
+                    <h3 className="text-xl font-black uppercase tracking-tight mb-2">
+                      {tool.name}
+                    </h3>
+                    <p className="text-muted-foreground font-medium text-sm line-clamp-4">
+                      {tool.description}
+                    </p>
+                  </div>
+                </div>
+                
+                {/* Card footer */}
+                <div className="px-6 pb-6">
+                  <span className="inline-block px-4 py-2 bg-black text-white font-bold uppercase text-sm tracking-wide neo-border group-hover:bg-purple-600 group-hover:text-white transition-colors">
+                    Open Tool
+                  </span>
+                </div>
+              </a>
+            ))}
           </div>
         </section>
 
