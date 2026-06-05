@@ -103,7 +103,7 @@ const moreTools = [
   },
   {
     id: 'image-tools',
-    name: 'AI Checker and Humanizer',
+    name: 'Image Tools',
     description: 'Resize, transform, convert and apply filters to images. Early Access',
     href: 'https://makron.app/image-tools/',
     color: 'bg-[#E0B0FF]',
