@@ -76,30 +76,58 @@ const moreTools = [
   {
     id: 'acado',
     name: 'Acado',
-    description: 'Academic document editor, with built-in APA 7 citation system and pre-formatted PDF generator. 𝗘𝗮𝗿𝗹𝘆 𝗔𝗰𝗰𝗲𝘀𝘀.',
+    description: 'Academic document editor, with built-in APA 7 citation system and pre-formatted PDF generator. Early Access',
     href: 'https://acado.makron.app',
-    color: 'bg-[#E0B0FF]', // Soft Purple / Mauve
+    color: 'bg-[#E0B0FF]',
   },
   {
     id: 'mizucv',
     name: 'Mizu',
-    description: 'Automatic CV builder, with built-in Europass CV format and PDF generator. Easily select which info you want to show. 𝗘𝗮𝗿𝗹𝘆 𝗔𝗰𝗰𝗲𝘀𝘀.',
+    description: 'Automatic CV builder, with built-in Europass CV format and PDF generator. Easily select which info you want to show. Early Access',
     href: 'https://cv.makron.app',
-    color: 'bg-[#C3B1E1]', // Pastel Purple
+    color: 'bg-[#E0B0FF]',
   },
   {
     id: 'teck',
     name: 'Teck',
-    description: 'Online LaTeX editor and PDF generator, with Overleaf template compatibility for imports/exports. 𝗘𝗮𝗿𝗹𝘆 𝗔𝗰𝗰𝗲𝘀𝘀.',
+    description: 'Online LaTeX editor and PDF generator, with Overleaf template compatibility for imports/exports. Early Access',
     href: 'https://teck.makron.app',
-    color: 'bg-[#BDB5D5]', // Thistle Purple
+    color: 'bg-[#E0B0FF]',
   },
   {
     id: 'aichecker',
     name: 'AI Checker and Humanizer',
-    description: 'Check your pasted text for AI generated content. 𝗘𝗮𝗿𝗹𝘆 𝗔𝗰𝗰𝗲𝘀𝘀.',
+    description: 'Check your pasted text for AI generated content. Early Access',
     href: 'https://makron.app/ai-detector-humanizer/',
-    color: 'bg-[#D6CADD]', // Pale Purple
+    color: 'bg-[#E0B0FF]',
+  },
+  {
+    id: 'image-tools',
+    name: 'AI Checker and Humanizer',
+    description: 'Resize, transform, convert and apply filters to images. Early Access',
+    href: 'https://makron.app/image-tools/',
+    color: 'bg-[#E0B0FF]',
+  },
+  {
+    id: 'audio-tools',
+    name: 'Audio Tools',
+    description: 'Convert, compress, trim and adjust audio files. Early Access',
+    href: 'https://makron.app/audio-tools/',
+    color: 'bg-[#E0B0FF]',
+  },
+  {
+    id: 'video-tools',
+    name: 'Video Tools',
+    description: 'Compress, resize, mute and replace audio of videos. Early Access',
+    href: 'https://makron.app/video-tools/',
+    color: 'bg-[#E0B0FF]',
+  },
+  {
+    id: 'pdf-tools',
+    name: 'PDF Tools',
+    description: 'Merge, split, rotate, compress PDFs. Early Access',
+    href: 'https://makron.app/pdf-tools/',
+    color: 'bg-[#E0B0FF]',
   },
 ]
 
