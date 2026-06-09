@@ -228,8 +228,8 @@ export default function CGPAPage() {
 
       parsePDFText(lines)
     } catch (error) {
-      console.error('PDF parsing error:', error)
-      alert('Failed to parse PDF. Please try again or enter courses manually.')
+      console.error('PDF reading error:', error)
+      alert('Could not read the PDF file. Please try again or enter courses manually.')
     }
 
     // Reset file input
@@ -238,106 +238,154 @@ export default function CGPAPage() {
     }
   }
 
-  const parsePDFText = (lines: string[]) => {
-    // BRACU grade sheet format:
-    // Semester header: "Semester : Spring 2023" or "Spring 2023" on its own
-    // Course rows: CSE221  Algorithm  3.00  A  4.00
-    //   or with (NT) = skip, (RT) = keep but remove (RT) text
+  const stripRT = (text: string): string => text.replace(/\s*\(RT\)\s*/g, ' ').trim()
 
-    const semesters: { title: string; courses: Course[] }[] = []
+  const parsePDFText = (lines: string[]) => {
+    // BRACU grade sheet format — single-pass, graceful parser.
+    // Never fails the whole PDF. Partial rows get '???' for unreadable cells.
+    // (NT) rows are skipped entirely. (RT) text is stripped but data is kept.
+
+    const parsed: { title: string; courses: Course[] }[] = []
     let currentSem: { title: string; courses: Course[] } | null = null
 
-    // Patterns for semester headers
-    const semesterPatterns = [
+    const flushSemester = () => {
+      if (currentSem && currentSem.courses.length > 0) {
+        parsed.push(currentSem)
+      }
+      currentSem = null
+    }
+
+    // Semester header patterns
+    const semHeaderPatterns = [
+      // "Semester : Spring 2023" or "Semester: Fall 2022"
       /semester\s*:\s*(spring|summer|fall|autumn)\s+(\d{4})/i,
-      /^((?:spring|summer|fall|autumn)\s+\d{4})\s*$/i,
+      // "Spring 2023" on its own line (or with trailing spaces/gpa summary)
+      /^((?:spring|summer|fall|autumn)\s+\d{4})/i,
+      // "Semester 1" or "1st Semester" style headers
+      /(?:semester\s+(\d+)|(\d+(?:st|nd|rd|th)?)\s+semester)/i,
     ]
 
-    // Pattern for course rows: CODE  NAME  CREDITS  GRADE  GPA
-    // Course codes: 2-4 letters + 3 digits (e.g. CSE221, MAT110, PHY107)
-    const coursePattern = /^([A-Z]{2,4}\d{3}[A-Z]?)\s+(.+?)\s+(\d+\.?\d*)\s+([A-F][+-]?)\s*(?:\(RT\)\s*)?(\d+\.?\d*)\s*(?:\(RT\))?/i
-    // NT pattern - if (NT) appears in a course row, skip it
-    const ntPattern = /\(NT\)/i
+    // Course code pattern: 2-4 uppercase letters + 3 digits, optional trailing letter
+    const codePat = /[A-Z]{2,4}\d{3}[A-Z]?/i
 
-    for (const line of lines) {
-      const trimmed = line.trim()
-      if (!trimmed) continue
+    // Grade pattern: A+, A, A-, B+, B, B-, C+, C, C-, D+, D, D-, F, I, W, P
+    const gradePat = /([A-F][+-]?|I|W|P)/
 
-      // Check for semester header
-      let semesterMatch: RegExpMatchArray | null = null
-      for (const pattern of semesterPatterns) {
-        semesterMatch = trimmed.match(pattern)
-        if (semesterMatch) break
+    // GPA pattern: decimal like 4.00, 3.70, 0.00
+    const gpaPat = /(\d\.\d{1,2})/
+
+    // Credit pattern: decimal like 3.00, 1.50
+    const creditPat = /(\d+\.?\d*)/
+
+    for (const rawLine of lines) {
+      const line = rawLine.trim()
+      if (!line) continue
+
+      // --- 1) Check for semester header ---
+      let semMatch: RegExpMatchArray | null = null
+      for (const pat of semHeaderPatterns) {
+        semMatch = line.match(pat)
+        if (semMatch) break
       }
 
-      if (semesterMatch) {
-        // Save previous semester if it has courses
-        if (currentSem && currentSem.courses.length > 0) {
-          semesters.push(currentSem)
+      if (semMatch) {
+        flushSemester()
+        let title = ''
+        if (semMatch[1] && semMatch[2]) {
+          // "Spring 2023" captured across two groups
+          title = `${semMatch[1]} ${semMatch[2]}`
+        } else if (semMatch[1]) {
+          title = semMatch[1]
+        } else if (semMatch[2]) {
+          title = `Semester ${semMatch[2]}`
+        } else {
+          title = semMatch[0].trim()
         }
-        const title = semesterMatch[1] ? `${semesterMatch[1]} ${semesterMatch[2]}` : semesterMatch[0]
         currentSem = { title: title.trim(), courses: [] }
         continue
       }
 
-      // Check for (NT) - skip this row entirely
-      if (ntPattern.test(trimmed)) continue
+      // --- 2) Skip (NT) rows entirely ---
+      if (/\(NT\)/i.test(line)) continue
 
-      // Try to match a course row
-      const courseMatch = trimmed.match(coursePattern)
-      if (courseMatch && currentSem) {
-        const courseCode = courseMatch[1]
-        let courseName = courseMatch[2].trim()
-        // Remove (RT) from course name if present
-        courseName = courseName.replace(/\s*\(RT\)\s*/g, '')
-        const credits = courseMatch[3]
-        const grade = courseMatch[4]
-        const gpa = courseMatch[5]
+      // --- 3) Try to extract a course row ---
+      // We need at minimum a course code somewhere on the line
+      const codeMatch = line.match(codePat)
+      if (!codeMatch) continue
 
-        currentSem.courses.push({
-          id: courseCode,
-          name: courseName,
-          gpa: gpa,
-          mark: reverseMapGrade(parseFloat(gpa)),
-        })
-        continue
+      // If we don't have a semester yet, create a default one
+      if (!currentSem) {
+        currentSem = { title: 'Imported Semester', courses: [] }
       }
 
-      // Fallback: try a more relaxed pattern for course rows that may have extra spaces
-      // Format: CODE  NAME  CREDITS  GRADE  GPA with possible (RT) markers
-      const relaxedPattern = /([A-Z]{2,4}\d{3}[A-Z]?)\s+(.+?)\s+(\d+\.?\d*)\s+([A-F][+-]?)\s+(\d+\.?\d*)/i
-      const relaxedMatch = trimmed.match(relaxedPattern)
-      if (relaxedMatch && currentSem) {
-        // Double check it's not an NT row (redundant but safe)
-        if (/\(NT\)/i.test(trimmed)) continue
+      // Strip (RT) from the whole line first
+      const cleanLine = stripRT(line)
 
-        const courseCode = relaxedMatch[1]
-        let courseName = relaxedMatch[2].trim()
-        courseName = courseName.replace(/\s*\(RT\)\s*/g, '')
-        const gpa = relaxedMatch[5]
+      // Strategy: extract fields one by one from the line, using '???' for anything missing
+      let id = codeMatch[0]
+      let name = '???'
+      let gpa = '???'
+      let mark = '???'
 
-        currentSem.courses.push({
-          id: courseCode,
-          name: courseName,
-          gpa: gpa,
-          mark: reverseMapGrade(parseFloat(gpa)),
-        })
+      // Everything after the course code is the rest of the line
+      const afterCode = cleanLine.slice(codeMatch.index! + id.length).trim()
+
+      // Try the full pattern first: NAME  CREDITS  GRADE  GPA
+      const fullPat = /^(.+?)\s+(\d+\.?\d*)\s+([A-F][+-]?|I|W|P)\s+(\d\.\d{1,2})\s*$/i
+      const fullMatch = afterCode.match(fullPat)
+      if (fullMatch) {
+        name = fullMatch[1].trim()
+        const gpaVal = parseFloat(fullMatch[4])
+        gpa = fullMatch[4]
+        mark = reverseMapGrade(gpaVal)
+      } else {
+        // Try: NAME  GRADE  GPA (no explicit credits column)
+        const partialPat = /^(.+?)\s+([A-F][+-]?|I|W|P)\s+(\d\.\d{1,2})/i
+        const partialMatch = afterCode.match(partialPat)
+        if (partialMatch) {
+          name = partialMatch[1].trim()
+          const gpaVal = parseFloat(partialMatch[3])
+          gpa = partialMatch[3]
+          mark = reverseMapGrade(gpaVal)
+        } else {
+          // Try to at least get GPA from the end of the line
+          const gpaOnlyPat = /(\d\.\d{1,2})\s*$/
+          const gpaOnlyMatch = afterCode.match(gpaOnlyPat)
+          if (gpaOnlyMatch) {
+            gpa = gpaOnlyMatch[1]
+            const gpaVal = parseFloat(gpaOnlyMatch[1])
+            mark = reverseMapGrade(gpaVal)
+            // Name is everything before the GPA — try to trim grade letters from the end
+            let rest = afterCode.slice(0, afterCode.lastIndexOf(gpaOnlyMatch[1])).trim()
+            // Remove trailing grade letter if present
+            rest = rest.replace(/\s+([A-F][+-]?|I|W|P)\s*$/i, '').trim()
+            // Remove trailing credit number if present
+            rest = rest.replace(/\s+\d+\.?\d*\s*$/i, '').trim()
+            name = rest || '???'
+          } else {
+            // Last resort: no GPA found — use the rest of line as name
+            name = afterCode.replace(/\s+([A-F][+-]?|I|W|P)\s*/gi, '').trim() || '???'
+          }
+        }
       }
+
+      // Validate: skip rows where id is clearly not a course code
+      // (e.g. it's part of a header row like "CSE" alone)
+      if (id.length < 5) continue
+
+      currentSem.courses.push({ id, name, gpa, mark })
     }
 
-    // Don't forget the last semester
-    if (currentSem && currentSem.courses.length > 0) {
-      semesters.push(currentSem)
-    }
+    // Flush last semester
+    flushSemester()
 
     // Add all parsed semesters
-    semesters.forEach((sem) => {
-      addSemester({ title: sem.title, courses: sem.courses })
-    })
-
-    // Alert if nothing was found
-    if (semesters.length === 0) {
-      alert('Could not detect any semester data from this PDF. The format may not be supported. Please enter courses manually.')
+    if (parsed.length > 0) {
+      parsed.forEach((sem) => {
+        addSemester({ title: sem.title, courses: sem.courses })
+      })
+    } else {
+      alert('No semester or course data could be detected in this PDF. The format may not be supported, or the file may not be an academic transcript. Please enter courses manually.')
     }
   }
 
