@@ -241,11 +241,11 @@ export default function HomePage() {
         {/* Tools Catalog */}
         <section className="max-w-7xl mx-auto px-4 py-8">
           <div className="flex items-center gap-4 mb-8">
-            <div className="h-1 flex-1 bg-black" />
+            <div className="h-1 flex-1 bg-foreground" />
             <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight">
               Tools
             </h2>
-            <div className="h-1 flex-1 bg-black" />
+            <div className="h-1 flex-1 bg-foreground" />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -285,7 +285,7 @@ export default function HomePage() {
                 
                 {/* Card footer */}
                 <div className="px-6 pb-6">
-                  <span className="inline-block px-4 py-2 bg-black text-white font-bold uppercase text-sm tracking-wide neo-border group-hover:bg-primary group-hover:text-black transition-colors">
+                  <span className="inline-block px-4 py-2 bg-foreground text-background font-bold uppercase text-sm tracking-wide neo-border group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
                     Launch Tool
                   </span>
                 </div>
@@ -299,7 +299,7 @@ export default function HomePage() {
                 <div className="absolute top-2 right-2 z-10 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button
                     onClick={() => openEditModal(tool)}
-                    className="p-2 bg-white neo-border text-sm font-bold hover:bg-muted"
+                    className="p-2 bg-card neo-border text-sm font-bold hover:bg-muted"
                     title="Edit"
                   >
                     <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2">
@@ -309,7 +309,7 @@ export default function HomePage() {
                   </button>
                   <button
                     onClick={() => handleDeleteTool(tool.id)}
-                    className="p-2 bg-white neo-border text-sm font-bold hover:bg-red-100"
+                    className="p-2 bg-card neo-border text-sm font-bold hover:bg-destructive/20"
                     title="Delete"
                   >
                     <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2">
@@ -326,7 +326,7 @@ export default function HomePage() {
                   className="block neo-hover"
                 >
                   {/* Card header with icon - Grey color for custom tools */}
-                  <div className="bg-gray-300 p-6 neo-border border-t-0 border-l-0 border-r-0">
+                  <div className="bg-muted p-6 neo-border border-t-0 border-l-0 border-r-0">
                     <div className="flex items-center justify-between">
                       <svg viewBox="0 0 24 24" className="w-12 h-12" fill="none" stroke="currentColor" strokeWidth="3">
                         <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
@@ -357,7 +357,7 @@ export default function HomePage() {
                   
                   {/* Card footer */}
                   <div className="px-6 pb-6">
-                    <span className="inline-block px-4 py-2 bg-black text-white font-bold uppercase text-sm tracking-wide neo-border group-hover:bg-gray-500 transition-colors">
+                    <span className="inline-block px-4 py-2 bg-foreground text-background font-bold uppercase text-sm tracking-wide neo-border group-hover:bg-muted transition-colors">
                       Open Link
                     </span>
                   </div>
@@ -371,7 +371,7 @@ export default function HomePage() {
               className="group neo-card neo-hover p-0 overflow-hidden text-left"
             >
               {/* Card header */}
-              <div className="bg-gray-200 p-6 neo-border border-t-0 border-l-0 border-r-0">
+              <div className="bg-muted p-6 neo-border border-t-0 border-l-0 border-r-0">
                 <div className="flex items-center justify-between">
                   <svg viewBox="0 0 24 24" className="w-12 h-12" fill="none" stroke="currentColor" strokeWidth="3">
                     <line x1="12" y1="5" x2="12" y2="19" />
@@ -402,7 +402,7 @@ export default function HomePage() {
               
               {/* Card footer */}
               <div className="px-6 pb-6">
-                <span className="inline-block px-4 py-2 bg-gray-400 text-white font-bold uppercase text-sm tracking-wide neo-border group-hover:bg-gray-600 transition-colors">
+                <span className="inline-block px-4 py-2 bg-foreground text-background font-bold uppercase text-sm tracking-wide neo-border group-hover:bg-muted transition-colors">
                   Add New
                 </span>
               </div>
@@ -414,11 +414,11 @@ export default function HomePage() {
 	{/* More Tools Section */}
         <section className="max-w-7xl mx-auto px-4 py-8">
           <div className="flex items-center gap-4 mb-8">
-            <div className="h-1 flex-1 bg-black" />
+            <div className="h-1 flex-1 bg-foreground" />
             <h2 className="text-xl md:text-2xl font-black uppercase tracking-tight text-center whitespace-nowrap">
               Some more tools by me
             </h2>
-            <div className="h-1 flex-1 bg-black" />
+            <div className="h-1 flex-1 bg-foreground" />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -464,7 +464,7 @@ export default function HomePage() {
                 
                 {/* Card footer */}
                 <div className="px-6 pb-6">
-                  <span className="inline-block px-4 py-2 bg-black text-white font-bold uppercase text-sm tracking-wide neo-border group-hover:bg-purple-600 group-hover:text-white transition-colors">
+                  <span className="inline-block px-4 py-2 bg-foreground text-background font-bold uppercase text-sm tracking-wide neo-border group-hover:bg-secondary group-hover:text-secondary-foreground transition-colors">
                     Open Tool
                   </span>
                 </div>
@@ -498,7 +498,7 @@ export default function HomePage() {
           <div className="absolute inset-0 bg-black/50" onClick={closeModal} />
           
           {/* Modal */}
-          <div className="relative bg-white neo-card p-6 w-full max-w-md">
+          <div className="relative bg-card neo-card p-6 w-full max-w-md">
             <h3 className="text-xl font-black uppercase tracking-tight mb-4">
               {editingTool ? 'Edit Shortcut' : 'Add Shortcut'}
             </h3>
@@ -530,7 +530,7 @@ export default function HomePage() {
             <div className="flex gap-3 mt-6">
               <button
                 onClick={closeModal}
-                className="flex-1 px-4 py-3 neo-btn bg-gray-200 hover:bg-gray-300"
+                className="flex-1 px-4 py-3 neo-btn bg-muted hover:bg-muted/80"
               >
                 Cancel
               </button>

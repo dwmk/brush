@@ -195,20 +195,38 @@ export default function CGPAPage() {
     try {
       const arrayBuffer = await file.arrayBuffer()
       const pdfjsLib = await import('pdfjs-dist')
-      
+
       // Set worker source
       pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`
-      
+
       const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise
-      let fullText = ''
+      const lines: string[] = []
 
       for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i)
         const textContent = await page.getTextContent()
-        fullText += textContent.items.map((item) => ('str' in item ? item.str : '')).join(' ') + '\n'
+        const items = textContent.items.filter((item): item is { str: string; transform: number[]; width: number } => 'str' in item && item.str.trim().length > 0)
+
+        // Group items by Y position to reconstruct lines
+        const lineMap = new Map<number, { x: number; str: string }[]>()
+        items.forEach(item => {
+          const y = Math.round(item.transform[5])
+          if (!lineMap.has(y)) lineMap.set(y, [])
+          lineMap.get(y)!.push({ x: item.transform[4], str: item.str })
+        })
+
+        // Sort by Y (descending, PDF coords start from bottom) then by X
+        const sortedLines = [...lineMap.entries()]
+          .sort((a, b) => b[0] - a[0])
+          .map(([, items]) => {
+            items.sort((a, b) => a.x - b.x)
+            return items.map(i => i.str).join(' ')
+          })
+
+        lines.push(...sortedLines)
       }
 
-      parsePDFText(fullText)
+      parsePDFText(lines)
     } catch (error) {
       console.error('PDF parsing error:', error)
       alert('Failed to parse PDF. Please try again or enter courses manually.')
@@ -220,31 +238,107 @@ export default function CGPAPage() {
     }
   }
 
-  const parsePDFText = (text: string) => {
-    const semesterBlocks = text.split(/SEMESTER:/).slice(1)
-    
-    semesterBlocks.forEach((block) => {
-      const titleMatch = block.match(/([A-Z]+\s\d{4})/)
-      const title = titleMatch ? titleMatch[1].trim() : 'Imported Semester'
-      
-      const courseRegex = /(\b[A-Z]{3}\d{3})\s+([A-Z\s]+?)\s+(\d\.\d{2})\s+[A-F][-+]?\s+(\d\.\d{2})/g
-      const courses: Course[] = []
-      let match
+  const parsePDFText = (lines: string[]) => {
+    // BRACU grade sheet format:
+    // Semester header: "Semester : Spring 2023" or "Spring 2023" on its own
+    // Course rows: CSE221  Algorithm  3.00  A  4.00
+    //   or with (NT) = skip, (RT) = keep but remove (RT) text
 
-      while ((match = courseRegex.exec(block)) !== null) {
-        const gpa = parseFloat(match[4])
-        courses.push({
-          id: match[1],
-          name: match[2].trim(),
-          gpa: gpa.toString(),
-          mark: reverseMapGrade(gpa),
+    const semesters: { title: string; courses: Course[] }[] = []
+    let currentSem: { title: string; courses: Course[] } | null = null
+
+    // Patterns for semester headers
+    const semesterPatterns = [
+      /semester\s*:\s*(spring|summer|fall|autumn)\s+(\d{4})/i,
+      /^((?:spring|summer|fall|autumn)\s+\d{4})\s*$/i,
+    ]
+
+    // Pattern for course rows: CODE  NAME  CREDITS  GRADE  GPA
+    // Course codes: 2-4 letters + 3 digits (e.g. CSE221, MAT110, PHY107)
+    const coursePattern = /^([A-Z]{2,4}\d{3}[A-Z]?)\s+(.+?)\s+(\d+\.?\d*)\s+([A-F][+-]?)\s*(?:\(RT\)\s*)?(\d+\.?\d*)\s*(?:\(RT\))?/i
+    // NT pattern - if (NT) appears in a course row, skip it
+    const ntPattern = /\(NT\)/i
+
+    for (const line of lines) {
+      const trimmed = line.trim()
+      if (!trimmed) continue
+
+      // Check for semester header
+      let semesterMatch: RegExpMatchArray | null = null
+      for (const pattern of semesterPatterns) {
+        semesterMatch = trimmed.match(pattern)
+        if (semesterMatch) break
+      }
+
+      if (semesterMatch) {
+        // Save previous semester if it has courses
+        if (currentSem && currentSem.courses.length > 0) {
+          semesters.push(currentSem)
+        }
+        const title = semesterMatch[1] ? `${semesterMatch[1]} ${semesterMatch[2]}` : semesterMatch[0]
+        currentSem = { title: title.trim(), courses: [] }
+        continue
+      }
+
+      // Check for (NT) - skip this row entirely
+      if (ntPattern.test(trimmed)) continue
+
+      // Try to match a course row
+      const courseMatch = trimmed.match(coursePattern)
+      if (courseMatch && currentSem) {
+        const courseCode = courseMatch[1]
+        let courseName = courseMatch[2].trim()
+        // Remove (RT) from course name if present
+        courseName = courseName.replace(/\s*\(RT\)\s*/g, '')
+        const credits = courseMatch[3]
+        const grade = courseMatch[4]
+        const gpa = courseMatch[5]
+
+        currentSem.courses.push({
+          id: courseCode,
+          name: courseName,
+          gpa: gpa,
+          mark: reverseMapGrade(parseFloat(gpa)),
+        })
+        continue
+      }
+
+      // Fallback: try a more relaxed pattern for course rows that may have extra spaces
+      // Format: CODE  NAME  CREDITS  GRADE  GPA with possible (RT) markers
+      const relaxedPattern = /([A-Z]{2,4}\d{3}[A-Z]?)\s+(.+?)\s+(\d+\.?\d*)\s+([A-F][+-]?)\s+(\d+\.?\d*)/i
+      const relaxedMatch = trimmed.match(relaxedPattern)
+      if (relaxedMatch && currentSem) {
+        // Double check it's not an NT row (redundant but safe)
+        if (/\(NT\)/i.test(trimmed)) continue
+
+        const courseCode = relaxedMatch[1]
+        let courseName = relaxedMatch[2].trim()
+        courseName = courseName.replace(/\s*\(RT\)\s*/g, '')
+        const gpa = relaxedMatch[5]
+
+        currentSem.courses.push({
+          id: courseCode,
+          name: courseName,
+          gpa: gpa,
+          mark: reverseMapGrade(parseFloat(gpa)),
         })
       }
+    }
 
-      if (courses.length > 0) {
-        addSemester({ title, courses })
-      }
+    // Don't forget the last semester
+    if (currentSem && currentSem.courses.length > 0) {
+      semesters.push(currentSem)
+    }
+
+    // Add all parsed semesters
+    semesters.forEach((sem) => {
+      addSemester({ title: sem.title, courses: sem.courses })
     })
+
+    // Alert if nothing was found
+    if (semesters.length === 0) {
+      alert('Could not detect any semester data from this PDF. The format may not be supported. Please enter courses manually.')
+    }
   }
 
   const reverseMapGrade = (gpa: number): string => {
@@ -264,7 +358,7 @@ export default function CGPAPage() {
           {/* Header */}
           <div className="mb-6">
             <h1 className="text-3xl md:text-4xl font-black uppercase tracking-tight mb-2">
-              <span className="bg-[#00E5FF] px-3 py-1 neo-border inline-block">
+              <span className="bg-accent px-3 py-1 neo-border inline-block">
                 CGPA Calculator
               </span>
             </h1>
@@ -283,7 +377,7 @@ export default function CGPAPage() {
                     key={policy}
                     onClick={() => setGradingPolicy(policy)}
                     className={`neo-btn px-4 py-2 text-sm uppercase ${
-                      gradingPolicy === policy ? 'bg-black text-white' : 'bg-white'
+                      gradingPolicy === policy ? 'bg-foreground text-background' : 'bg-card'
                     }`}
                   >
                     {policy}
@@ -306,7 +400,7 @@ export default function CGPAPage() {
                 />
                 <button
                   onClick={applyCustomBoundaries}
-                  className="neo-btn px-4 py-2 bg-[#00E5FF] text-sm mt-2"
+                  className="neo-btn px-4 py-2 bg-accent text-sm mt-2"
                 >
                   Apply Boundaries
                 </button>
@@ -316,13 +410,13 @@ export default function CGPAPage() {
 
           {/* Actions */}
           <div className="flex flex-wrap gap-4 mb-6">
-            <button onClick={() => addSemester()} className="neo-btn px-6 py-3 bg-[#00E5FF]">
+            <button onClick={() => addSemester()} className="neo-btn px-6 py-3 bg-accent">
               + Add Semester
             </button>
 
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground">or upload from Connect:</span>
-              <label className="neo-btn px-4 py-3 bg-[#C8FF00] cursor-pointer text-sm">
+              <label className="neo-btn px-4 py-3 bg-tertiary cursor-pointer text-sm">
                 Upload PDF
                 <input
                   ref={fileInputRef}
@@ -349,7 +443,7 @@ export default function CGPAPage() {
                   />
                   <button
                     onClick={() => removeSemester(semIdx)}
-                    className="neo-btn px-3 py-2 bg-red-400 text-sm"
+                    className="neo-btn px-3 py-2 bg-destructive text-sm"
                   >
                     Remove
                   </button>
@@ -360,7 +454,7 @@ export default function CGPAPage() {
                   {semester.courses.map((course, courseIdx) => (
                     <div
                       key={courseIdx}
-                      className="grid grid-cols-[70px_1fr_80px_80px_auto] gap-2 items-center neo-border p-3 bg-white"
+                      className="grid grid-cols-[70px_1fr_80px_80px_auto] gap-2 items-center neo-border p-3 bg-card"
                     >
                       <input
                         type="text"
@@ -410,7 +504,7 @@ export default function CGPAPage() {
                 <div className="flex items-center justify-between">
                   <button
                     onClick={() => addCourse(semIdx)}
-                    className="neo-btn px-4 py-2 bg-[#C8FF00] text-sm"
+                    className="neo-btn px-4 py-2 bg-tertiary text-sm"
                   >
                     + Add Course
                   </button>
@@ -423,9 +517,9 @@ export default function CGPAPage() {
           </div>
 
           {/* CGPA Result */}
-          <div className="neo-card p-8 bg-black text-white text-center">
+          <div className="neo-card p-8 bg-foreground text-background text-center">
             <p className="uppercase font-bold tracking-wide mb-2">Cumulative GPA</p>
-            <div className="text-6xl md:text-8xl font-black text-[#00E5FF]">{cgpa}</div>
+            <div className="text-6xl md:text-8xl font-black text-accent">{cgpa}</div>
           </div>
         </div>
       </main>

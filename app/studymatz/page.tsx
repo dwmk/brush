@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { Navbar } from '@/components/navbar'
-import { BookOpen, RefreshCw, ExternalLink, FileText, AlertCircle, Plus, UploadCloud, X } from 'lucide-react'
+import { BookOpen, RefreshCw, ExternalLink, FileText, CircleAlert as AlertCircle, Plus, CloudUpload as UploadCloud, X } from 'lucide-react'
 
 interface StudyMaterial {
   courseCode: string
@@ -145,10 +145,10 @@ export default function StudyMatzPage() {
       <main className="pt-20 pb-8 px-4">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <div className="neo-card p-6 mb-6 bg-orange-400">
+          <div className="neo-card p-6 mb-6 bg-primary">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className="p-3 bg-white neo-border">
+                <div className="p-3 bg-card neo-border">
                   <BookOpen className="w-8 h-8" />
                 </div>
                 <div>
@@ -165,7 +165,7 @@ export default function StudyMatzPage() {
               <button
                 onClick={handleRefresh}
                 disabled={isLoading && !initialLoadDone}
-                className="neo-btn px-4 py-2 bg-white flex items-center gap-2 disabled:opacity-50"
+                className="neo-btn px-4 py-2 bg-card flex items-center gap-2 disabled:opacity-50"
               >
                 <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
                 Refresh
@@ -178,7 +178,7 @@ export default function StudyMatzPage() {
             {!isFormOpen ? (
               <button 
                 onClick={() => setIsFormOpen(true)}
-                className="neo-btn w-full py-4 bg-green-400 flex items-center justify-center gap-2 font-bold text-lg hover:bg-green-500 transition-colors"
+                className="neo-btn w-full py-4 bg-tertiary flex items-center justify-center gap-2 font-bold text-lg hover:bg-tertiary/80 transition-colors"
               >
                 <Plus className="w-6 h-6" />
                 Contribute a resource here
@@ -187,7 +187,7 @@ export default function StudyMatzPage() {
               <div className="neo-card p-6 bg-card border-green-400 border-4">
                 <div className="flex justify-between items-center mb-4 border-b pb-2">
                   <h2 className="text-xl font-black uppercase flex items-center gap-2">
-                    <UploadCloud className="w-6 h-6 text-green-600" />
+                    <UploadCloud className="w-6 h-6 text-tertiary-foreground" />
                     Submit New Material
                   </h2>
                   <button 
@@ -229,7 +229,7 @@ export default function StudyMatzPage() {
                       </div>
                       <div>
                         <label className="block text-sm font-bold mb-1">Attach Files</label>
-                        <input type="file" name="files" multiple className="neo-input w-full bg-white file:mr-4 file:py-1 file:px-4 file:border-0 file:text-sm file:font-bold file:bg-green-100 file:text-green-700 hover:file:bg-green-200" />
+                        <input type="file" name="files" multiple className="neo-input w-full bg-card file:mr-4 file:py-1 file:px-4 file:border-0 file:text-sm file:font-bold file:bg-muted file:text-foreground hover:file:bg-muted/80" />
                       </div>
                     </div>
                   </div>
@@ -240,7 +240,7 @@ export default function StudyMatzPage() {
                   </div>
 
                   {submitStatus && (
-                    <div className={`p-3 font-bold neo-border ${submitStatus.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                    <div className={`p-3 font-bold neo-border ${submitStatus.type === 'success' ? 'bg-tertiary text-tertiary-foreground' : 'bg-destructive text-destructive-foreground'}`}>
                       {submitStatus.msg}
                     </div>
                   )}
@@ -277,9 +277,9 @@ export default function StudyMatzPage() {
 
           {/* Error */}
           {error && (
-            <div className="neo-card p-4 mb-6 bg-red-100 flex items-center gap-3">
-              <AlertCircle className="w-5 h-5 text-red-600" />
-              <span className="text-red-800 font-medium">{error}</span>
+            <div className="neo-card p-4 mb-6 bg-destructive flex items-center gap-3">
+              <AlertCircle className="w-5 h-5 text-destructive-foreground" />
+              <span className="text-destructive-foreground font-medium">{error}</span>
             </div>
           )}
 

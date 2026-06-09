@@ -256,7 +256,7 @@ export default function ClassVaderPage() {
           {/* Header */}
           <div className="mb-6">
             <h1 className="text-3xl md:text-4xl font-black uppercase tracking-tight mb-2">
-              <span className="bg-[#FF3D8F] px-3 py-1 neo-border inline-block text-white">
+              <span className="bg-secondary px-3 py-1 neo-border inline-block text-secondary-foreground">
                 Class Vader
               </span>
             </h1>
@@ -302,7 +302,7 @@ export default function ClassVaderPage() {
 
               <button
                 onClick={() => setSearchVisible(!searchVisible)}
-                className="neo-btn px-4 py-2 bg-white text-sm"
+                className="neo-btn px-4 py-2 bg-card text-sm"
               >
                 {searchVisible ? 'Hide Search' : 'Search'}
               </button>
@@ -336,7 +336,7 @@ export default function ClassVaderPage() {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`neo-btn px-4 py-2 text-sm ${
-                  activeTab === tab.id ? 'bg-black text-white' : 'bg-white'
+                  activeTab === tab.id ? 'bg-foreground text-background' : 'bg-card'
                 }`}
               >
                 {tab.label}

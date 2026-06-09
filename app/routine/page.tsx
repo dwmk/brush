@@ -174,7 +174,7 @@ export default function RoutinePage() {
           {/* Header */}
           <div className="mb-6">
             <h1 className="text-3xl md:text-4xl font-black uppercase tracking-tight mb-2">
-              <span className="bg-[#FAFF00] px-3 py-1 neo-border inline-block">
+              <span className="bg-primary px-3 py-1 neo-border inline-block">
                 Course Routine
               </span>
             </h1>
@@ -196,7 +196,7 @@ export default function RoutinePage() {
               <button
                 onClick={loadData}
                 disabled={isLoading}
-                className="neo-btn px-6 py-3 bg-[#FAFF00]"
+                className="neo-btn px-6 py-3 bg-primary"
               >
                 {isLoading ? 'Loading...' : 'Refresh'}
               </button>
@@ -211,7 +211,7 @@ export default function RoutinePage() {
                   const isLab = (item.sectionType || '').toUpperCase() === 'LAB'
                   const inCart = cart.some((c) => c.sectionId === item.sectionId)
 
-                  let seatColor = 'bg-gray-400'
+                  let seatColor = 'bg-muted'
                   if (pct >= 80) seatColor = 'bg-green-500'
                   else if (pct >= 50) seatColor = 'bg-yellow-400'
                   else if (pct >= 20) seatColor = 'bg-orange-500'
@@ -221,7 +221,7 @@ export default function RoutinePage() {
                     <div
                       key={item.sectionId}
                       className={`flex-shrink-0 w-64 neo-border p-4 cursor-pointer neo-hover ${
-                        inCart ? 'bg-[#FAFF00]' : 'bg-white'
+                        inCart ? 'bg-primary' : 'bg-card'
                       }`}
                       onMouseEnter={() => setHoveredSection(item)}
                       onMouseLeave={() => setHoveredSection(null)}
@@ -242,7 +242,7 @@ export default function RoutinePage() {
                           {item.courseCredit} cr · {isLab ? 'Lab' : 'Class'}
                         </span>
                         <div className="flex items-center gap-2">
-                          <div className="w-16 h-2 bg-gray-200 neo-border">
+                          <div className="w-16 h-2 bg-muted neo-border">
                             <div className={`h-full ${seatColor}`} style={{ width: `${pct}%` }} />
                           </div>
                           <span className="text-xs font-mono">
@@ -268,7 +268,7 @@ export default function RoutinePage() {
               <span className="text-sm font-medium">Lab</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-6 h-4 bg-gray-300 neo-border opacity-50" />
+              <div className="w-6 h-4 bg-muted neo-border opacity-50" />
               <span className="text-sm font-medium">Hover Preview</span>
             </div>
           </div>
@@ -306,7 +306,7 @@ export default function RoutinePage() {
                     {TIME_LABELS.map((_, timeIndex) => (
                       <div
                         key={timeIndex}
-                        className="h-14 neo-border border-t-0 border-l-0 bg-white"
+                        className="h-14 neo-border border-t-0 border-l-0 bg-card"
                       />
                     ))}
                   </div>
@@ -340,7 +340,7 @@ export default function RoutinePage() {
           <div className="neo-card p-4">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-black uppercase">Cart</h2>
-              <button onClick={clearCart} className="neo-btn px-4 py-2 bg-red-400 text-sm">
+              <button onClick={clearCart} className="neo-btn px-4 py-2 bg-destructive text-sm">
                 Clear All
               </button>
             </div>
@@ -360,7 +360,7 @@ export default function RoutinePage() {
                   return (
                     <div
                       key={section.sectionId}
-                      className="flex flex-col md:flex-row md:items-center justify-between p-4 neo-border bg-white gap-4"
+                      className="flex flex-col md:flex-row md:items-center justify-between p-4 neo-border bg-card gap-4"
                     >
                       <div>
                         <h3 className="font-black">
