@@ -70,6 +70,53 @@
   --sidebar-ring: #000000;
 }
 
+/* Dark Mode - Inverted Neobrutalism */
+.dark {
+  --background: #1A1A1A;
+  --foreground: #F0F0F0;
+  --card: #2A2A2A;
+  --card-foreground: #F0F0F0;
+  --popover: #2A2A2A;
+  --popover-foreground: #F0F0F0;
+
+  --primary: #FAFF00;
+  --primary-foreground: #1A1A1A;
+
+  --secondary: #FF3D8F;
+  --secondary-foreground: #F0F0F0;
+
+  --accent: #00E5FF;
+  --accent-foreground: #1A1A1A;
+
+  --tertiary: #C8FF00;
+  --tertiary-foreground: #1A1A1A;
+
+  --muted: #333333;
+  --muted-foreground: #AAAAAA;
+
+  --destructive: #FF4444;
+  --destructive-foreground: #F0F0F0;
+
+  --border: #F0F0F0;
+  --input: #333333;
+  --ring: #F0F0F0;
+
+  --chart-1: #FAFF00;
+  --chart-2: #FF3D8F;
+  --chart-3: #00E5FF;
+  --chart-4: #C8FF00;
+  --chart-5: #FF9500;
+
+  --sidebar: #2A2A2A;
+  --sidebar-foreground: #F0F0F0;
+  --sidebar-primary: #FAFF00;
+  --sidebar-primary-foreground: #1A1A1A;
+  --sidebar-accent: #FF3D8F;
+  --sidebar-accent-foreground: #F0F0F0;
+  --sidebar-border: #F0F0F0;
+  --sidebar-ring: #F0F0F0;
+}
+
 @theme inline {
   --font-sans: 'Space Grotesk', 'Geist', ui-sans-serif, system-ui;
   --font-mono: 'JetBrains Mono', 'Geist Mono', ui-monospace, monospace;
@@ -122,19 +169,19 @@
 
 /* Neobrutalist Utility Classes */
 .neo-border {
-  border: 3px solid #000000;
+  border: 3px solid var(--border);
 }
 
 .neo-shadow {
-  box-shadow: 6px 6px 0px #000000;
+  box-shadow: 6px 6px 0px var(--border);
 }
 
 .neo-shadow-sm {
-  box-shadow: 4px 4px 0px #000000;
+  box-shadow: 4px 4px 0px var(--border);
 }
 
 .neo-shadow-lg {
-  box-shadow: 8px 8px 0px #000000;
+  box-shadow: 8px 8px 0px var(--border);
 }
 
 .neo-hover {
@@ -143,23 +190,23 @@
 
 .neo-hover:hover {
   transform: translate(-2px, -2px);
-  box-shadow: 8px 8px 0px #000000;
+  box-shadow: 8px 8px 0px var(--border);
 }
 
 .neo-hover:active {
   transform: translate(2px, 2px);
-  box-shadow: 4px 4px 0px #000000;
+  box-shadow: 4px 4px 0px var(--border);
 }
 
 .neo-card {
   background-color: var(--card);
-  border: 3px solid #000000;
-  box-shadow: 6px 6px 0px #000000;
+  border: 3px solid var(--border);
+  box-shadow: 6px 6px 0px var(--border);
 }
 
 .neo-btn {
-  border: 3px solid #000000;
-  box-shadow: 4px 4px 0px #000000;
+  border: 3px solid var(--border);
+  box-shadow: 4px 4px 0px var(--border);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.025em;
@@ -168,24 +215,25 @@
 
 .neo-btn:hover {
   transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0px #000000;
+  box-shadow: 6px 6px 0px var(--border);
 }
 
 .neo-btn:active {
   transform: translate(2px, 2px);
-  box-shadow: 2px 2px 0px #000000;
+  box-shadow: 2px 2px 0px var(--border);
 }
 
 .neo-input {
-  border: 3px solid #000000;
-  background-color: white;
+  border: 3px solid var(--border);
+  background-color: var(--input);
+  color: var(--foreground);
   padding: 0.75rem 1rem;
   font-family: var(--font-mono);
 }
 
 .neo-input:focus {
   outline: none;
-  box-shadow: 0 0 0 2px #000000, 0 0 0 4px white;
+  box-shadow: 0 0 0 2px var(--border), 0 0 0 4px var(--background);
 }
 
 /* Brutalist text styles */
@@ -205,14 +253,14 @@
 
 /* Pattern backgrounds */
 .pattern-dots {
-  background-image: radial-gradient(#000000 1px, transparent 1px);
+  background-image: radial-gradient(var(--border) 1px, transparent 1px);
   background-size: 16px 16px;
 }
 
 .pattern-grid {
-  background-image: 
-    linear-gradient(to right, #000000 1px, transparent 1px),
-    linear-gradient(to bottom, #000000 1px, transparent 1px);
+  background-image:
+    linear-gradient(to right, var(--border) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--border) 1px, transparent 1px);
   background-size: 20px 20px;
 }
 
@@ -221,8 +269,8 @@
     45deg,
     transparent,
     transparent 10px,
-    #000000 10px,
-    #000000 11px
+    var(--border) 10px,
+    var(--border) 11px
   );
 }
 
@@ -234,19 +282,19 @@
 
 ::-webkit-scrollbar-track {
   background: var(--muted);
-  border: 2px solid #000000;
+  border: 2px solid var(--border);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #000000;
+  background: var(--border);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #333333;
+  background: var(--muted-foreground);
 }
 
 /* Selection styling */
 ::selection {
   background: var(--primary);
-  color: #000000;
+  color: var(--primary-foreground);
 }

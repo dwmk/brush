@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { CustomTool, loadCustomTools } from '@/lib/custom-tools'
+import { ThemeToggle } from '@/components/theme-toggle'
 
 const navItems = [
   { href: '/', label: 'Hub' },
@@ -51,7 +52,7 @@ export function Navbar() {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white neo-border border-t-0 border-l-0 border-r-0">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-card neo-border border-t-0 border-l-0 border-r-0">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-between h-16">
             <Link href="/" className="flex items-center gap-2 neo-hover" prefetch>
@@ -59,7 +60,7 @@ export function Navbar() {
                 BRUSH
               </span>
             </Link>
-            
+
             <div className="hidden md:flex items-center gap-2">
               {navItems.map((item) => (
                 <Link
@@ -68,14 +69,14 @@ export function Navbar() {
                   prefetch
                   className={`px-4 py-2 font-bold uppercase tracking-wide text-sm neo-hover ${
                     pathname === item.href
-                      ? 'bg-black text-white neo-border'
-                      : 'neo-border bg-white hover:bg-muted'
+                      ? 'bg-foreground text-background neo-border'
+                      : 'neo-border bg-card hover:bg-muted'
                   }`}
                 >
                   {item.label}
                 </Link>
               ))}
-              
+
               {/* Custom tools in navbar */}
               {customTools.map((tool) => (
                 <a
@@ -83,11 +84,14 @@ export function Navbar() {
                   href={tool.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-4 py-2 font-bold uppercase tracking-wide text-sm neo-hover neo-border bg-gray-200 hover:bg-gray-300"
+                  className="px-4 py-2 font-bold uppercase tracking-wide text-sm neo-hover neo-border bg-muted hover:bg-muted/80"
                 >
                   {tool.name}
                 </a>
               ))}
+
+              {/* Theme toggle */}
+              <ThemeToggle />
             </div>
 
             {/* Mobile menu button */}
@@ -116,11 +120,17 @@ export function Navbar() {
         
         {/* Sliding Panel */}
         <div
-          className={`absolute top-16 right-0 w-64 h-[calc(100vh-64px)] bg-white neo-border border-t-0 border-r-0 transform transition-transform duration-200 overflow-y-auto ${
+          className={`absolute top-16 right-0 w-64 h-[calc(100vh-64px)] bg-card neo-border border-t-0 border-r-0 transform transition-transform duration-200 overflow-y-auto ${
             mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
           }`}
         >
           <div className="p-4 space-y-2">
+            {/* Theme toggle at top of mobile menu */}
+            <div className="flex items-center justify-between pb-2 border-b-3 border-border mb-2">
+              <span className="text-xs font-bold uppercase text-muted-foreground">Theme</span>
+              <ThemeToggle />
+            </div>
+
             {navItems.map((item) => (
               <Link
                 key={item.href}
@@ -129,8 +139,8 @@ export function Navbar() {
                 onClick={() => setMobileMenuOpen(false)}
                 className={`block w-full px-4 py-3 font-bold uppercase tracking-wide text-sm neo-border ${
                   pathname === item.href
-                    ? 'bg-black text-white'
-                    : 'bg-white hover:bg-muted'
+                    ? 'bg-foreground text-background'
+                    : 'bg-card hover:bg-muted'
                 }`}
               >
                 {item.label}
@@ -152,7 +162,7 @@ export function Navbar() {
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="block w-full px-4 py-3 font-bold uppercase tracking-wide text-sm neo-border bg-gray-200 hover:bg-gray-300"
+                    className="block w-full px-4 py-3 font-bold uppercase tracking-wide text-sm neo-border bg-muted hover:bg-muted/80"
                   >
                     {tool.name}
                   </a>
